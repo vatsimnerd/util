@@ -4,16 +4,23 @@ import (
 	"sync"
 )
 
+type InitialNotifier func(sub Subscription)
+
 type Provider struct {
 	dataReady bool
 	subsLock  sync.RWMutex
 	subs      map[string]Subscription
+	notifier  InitialNotifier
 }
 
 func NewProvider() *Provider {
 	return &Provider{
 		subs: make(map[string]Subscription),
 	}
+}
+
+func (p *Provider) SetInitialNotifier(notifier InitialNotifier) {
+	p.notifier = notifier
 }
 
 func (p *Provider) SetDataReady(val bool) {
@@ -25,6 +32,10 @@ func (p *Provider) Subscribe(chSize int) Subscription {
 	defer p.subsLock.Unlock()
 	sub := makeSubscription(chSize)
 	p.subs[sub.id] = sub
+
+	if p.dataReady && p.notifier != nil {
+		p.notifier(sub)
+	}
 	return sub
 }
 
@@ -37,7 +48,7 @@ func (p *Provider) Unsubscribe(sub Subscription) {
 
 func (p *Provider) Notify(update Update) {
 	p.subsLock.RLock()
-	defer p.subsLock.Unlock()
+	defer p.subsLock.RUnlock()
 	for _, sub := range p.subs {
 		sub.Send(update)
 	}

@@ -21,3 +21,11 @@ func (s Subscription) Send(update Update) {
 func (s Subscription) Fin() {
 	s.ch <- updateFin
 }
+
+func (s Subscription) Updates() <-chan Update {
+	return s.ch
+}
+
+func (s Subscription) ID() string {
+	return s.id
+}
