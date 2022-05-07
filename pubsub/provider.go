@@ -57,3 +57,17 @@ func (p *Provider) Notify(update Update) {
 func (p *Provider) Fin() {
 	p.Notify(updateFin)
 }
+
+func (p *Provider) Dispose() {
+	p.subsLock.Lock()
+	defer p.subsLock.Unlock()
+
+	for _, sub := range p.subs {
+		close(sub.ch)
+	}
+
+	for k := range p.subs {
+		delete(p.subs, k)
+	}
+	p.notifier = nil
+}
