@@ -1,6 +1,10 @@
 package set
 
-import "sync"
+import (
+	"fmt"
+	"strings"
+	"sync"
+)
 
 type SafeSet[K comparable] struct {
 	m    map[K]bool
@@ -92,6 +96,8 @@ func (s *SafeSet[K]) Intersection(other *SafeSet[K]) *SafeSet[K] {
 
 func (s *SafeSet[K]) Copy() *SafeSet[K] {
 	res := NewSafe[K]()
+	s.lock.RLock()
+	defer s.lock.RUnlock()
 	for k := range s.m {
 		res.m[k] = true
 	}
@@ -111,4 +117,32 @@ func (s *SafeSet[K]) Subtract(other *SafeSet[K]) *SafeSet[K] {
 
 func (s *SafeSet[K]) Difference(other *SafeSet[K]) *SafeSet[K] {
 	return s.Subtract(other)
+}
+
+func (s *SafeSet[K]) Eq(other *SafeSet[K]) bool {
+	s.lock.RLock()
+	defer s.lock.RUnlock()
+	if len(s.m) != len(other.m) {
+		return false
+	}
+	for k := range s.m {
+		if _, found := other.m[k]; !found {
+			return false
+		}
+	}
+	return true
+}
+
+func (s *SafeSet[K]) String() string {
+	res := make([]string, len(s.m))
+	i := 0
+
+	s.lock.RLock()
+	for k := range s.m {
+		res[i] = fmt.Sprintf("%v", k)
+		i++
+	}
+	s.lock.RUnlock()
+
+	return fmt.Sprintf("*set.Set{%s}", strings.Join(res, ", "))
 }

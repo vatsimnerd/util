@@ -1,5 +1,10 @@
 package set
 
+import (
+	"fmt"
+	"strings"
+)
+
 type Set[K comparable] struct {
 	m map[K]bool
 }
@@ -99,4 +104,26 @@ func (s *Set[K]) Subtract(other *Set[K]) *Set[K] {
 
 func (s *Set[K]) Difference(other *Set[K]) *Set[K] {
 	return s.Subtract(other)
+}
+
+func (s *Set[K]) Eq(other *Set[K]) bool {
+	if len(s.m) != len(other.m) {
+		return false
+	}
+	for k := range s.m {
+		if _, found := other.m[k]; !found {
+			return false
+		}
+	}
+	return true
+}
+
+func (s *Set[K]) String() string {
+	res := make([]string, len(s.m))
+	i := 0
+	for k := range s.m {
+		res[i] = fmt.Sprintf("%v", k)
+		i++
+	}
+	return fmt.Sprintf("*set.Set{%s}", strings.Join(res, ", "))
 }

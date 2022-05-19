@@ -126,3 +126,40 @@ func TestIntersection(t *testing.T) {
 		t.Errorf("r should be [5,7], got %v", l)
 	}
 }
+
+func TestEq(t *testing.T) {
+	s := FromList([]int{1, 3, 5, 7})
+	u := FromList([]int{1, 3, 5, 7})
+
+	if !s.Eq(u) {
+		t.Errorf("%s must be Equal to %s", s, u)
+	}
+
+	s = FromList([]int{1, 3, 5, 7})
+	u = FromList([]int{7, 5, 3, 1})
+
+	if !s.Eq(u) {
+		t.Errorf("%s must be Equal to %s", s, u)
+	}
+
+	s = FromList([]int{1, 3, 5, 7})
+	u = FromList([]int{1, 3, 5})
+
+	if s.Eq(u) {
+		t.Errorf("%s must be Not Equal to %s", s, u)
+	}
+
+	s = FromList([]int{1, 3, 5, 7})
+	u = FromList([]int{1, 3, 5, 7, 9})
+
+	if s.Eq(u) {
+		t.Errorf("%s must be Not Equal to %s", s, u)
+	}
+
+	s = FromList([]int{1, 3, 5, 7})
+	u = FromList([]int{1, 3, 5, 9})
+
+	if s.Eq(u) {
+		t.Errorf("%s must be Not Equal to %s", s, u)
+	}
+}
